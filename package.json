@@ -1,0 +1,14 @@
+{
+  "name": "contact-app",
+  "version": "1.0.0",
+  "dependencies": {
+    "grunt-cli": "latest",
+    "grunt-contrib-concat": "latest",
+    "grunt-contrib-uglify": "latest",
+    "grunt-contrib-less": "latest",
+    "grunt-contrib-watch": "latest"
+  },
+  "devDependencies": {
+    "grunt-contrib-imagemin": "~0.7.0"
+  }
+}

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<!-- Set the document as an Angular application -->
+<html ng-app="contactsApp">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>Jamie's Contact App</title>
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="css/app.css"/>
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,800italic,400,700,800' rel='stylesheet' type='text/css'>
+</head>
+<body>
+	<header class="hero-header"> 
+		<h1 class="hero-title">
+			<span class="sub-text">My Awesome*</span>
+			Contact App
+		</h1>
+		<p class="extra-text">* probably not so awesome!</p>
+	</header>
+	<!-- Set the ng-controller on this section: this makes this part the dynamic bit of the application -->
+	<section class="main-section" ng-controller="ContactListCtrl">
+		<div class="action-bar">
+			<div class="w">
+				<a class="button button-add-contact" ng-click="showNewContactForm = true">Add New</a>
+
+				<div class="modal-outer" ng-show="showNewContactForm">
+					<div class="modal-box">
+						<form name="addContact" ng-submit="addNew(addContact.$valid)" novalidate>
+							<h3>Add New Contact</h3>
+							<div class="inner">
+								<!-- Use conditionals to display different alerts -->
+								<div class="alert {{alertClass}}" ng-show="showAlert">
+									<!-- Change the showAlert var to false on click (shutting the modal box) -->
+									 <a class="button button-close" ng-click="showAlert = false" >×</a>
+									 <p>{{alertText}}</p>
+								</div>
+								<!-- $dirty is a part of a formController which means invalid - so show this if the userName isn't entered or the userEmail is an incorrect format -->
+								<div class="inline-errors" ng-show="addContact.userEmail.$invalid">
+							      <span ng-show="addContact.userEmail.$error.email && !addContact.$pristine">This is not a valid email.</span>
+							    </div>
+
+								
+								<p><label for="userName">Name</label>
+								<input type="text" ng-model="newContact.name" name="userName" required /></p>
+								<p><label for="userEmail">Email</label>
+								<input type="email" ng-model="newContact.email" name="userEmail" /></p>
+								<p><label for="userLocation">Location</label>
+								<input type="text" ng-model="newContact.location" name="userLocation" /></p>
+								<p><label for="userPrimary">Contact Number</label>
+								<input type="text" ng-model="newContact.primary" name="userPrimary" /></p>
+								<button type="submit" class="button" ng-click="addNew()" ng-disabled="addContact.$invalid">Add</button>
+								<a class="button button-cancel" ng-click="showNewContactForm = false">Cancel</a>
+								
+							</div>
+							<a class="button button-yes button-strip" ng-click="showNewContactForm = false" ng-show="formStatus">Done</a>
+						</form>
+					</div>
+				</div>
+				<div id="filter-toggle-btn" class="filter-toggle"> 
+					
+				</div>
+
+				<div class="tool">  
+					<label class="screen-reader-text" for="orderby">Order by: </label>
+					<span class="select-wrap">
+						<select name="orderby" ng-model="orderProp">
+							<option value="name">Asc</option>
+							<option value="-name">Desc</option>
+						</select>
+					</span>
+				</div>
+
+				<div id="search-filter" class="filter">
+					<div class="tool "> 
+						<label class="screen-reader-text" for="searchfilter">Search: </label>
+						<input type="search" name="searchfilter" placeholder="Search..." ng-model="searchContacts.name">
+					</div>
+				</div>
+				
+				
+					
+
+			</div>
+		</div>
+
+
+		<div class="contacts-area">
+
+			<p class="contacts-count">You have <strong>{{contacts.length}}</strong> contact<span ng-hide="contacts.length == 1">s</span>.</p>
+			
+			<!-- Use ng-show to say if the contacts (whilst filtered) are equal to 0, show this -->
+			<div class="no-results" ng-show="(contacts | filter:searchContacts).length == 0">
+				<p><strong>Whoops! It appears there's nobody here under that name.</strong></p>
+				<p>You can always <a ng-click="showNewContactForm = true" href="#">add a new contact</a>.</p>
+			</div>
+
+			<ul class="contacts-list">
+				<!--
+					Use ngRepeat to pull the array from our controller
+					and display each item as a list item
+
+					- use a filter to be able to search with a 
+						comparator of just name to only search names
+
+					- use orderBy and grab the value of orderProp,
+						the default is set in our controller
+
+				-->
+				<li class="contact" ng-repeat="contact in contacts | filter:searchContacts:name | orderBy:orderProp">
+					<!-- 
+						Add a link to the contact - but use a custom filter 
+						on the name to make it link friendly (replace 
+						spaces, lowercase) 
+					-->
+					<div class="contact-main">
+						<h3 ng-class="{active: showDetail == true}" class="contact-name" ng-click="showDetail = !showDetail">{{contact.name}}</h3> 
+						 
+						<div class="contact-detail" ng-show="showDetail">
+							<div class="inner">
+								<p ng-show="contact.email"><a href="mailto:{{contact.email}}">{{contact.email}}</a></p>
+								<p ng-show="contact.primary">Tel: {{contact.primary | tel}}</p>
+								<p ng-show="contact.location"><span>{{contact.location}}</span></p>
+							</div>
+							<div class="detail-actions">
+								<a class="button button-edit" ng-click="editMode = true">Edit</a>
+								<a class="button button-delete" ng-click="removeContact(contact)">Delete</a>
+								
+							</div>
+						</div>
+					</div>
+					<div class="modal-outer contact-edit" ng-show="editMode">
+						<div class="modal-box">
+							<form name="editContact">
+								<h3>Edit {{contact.name}}</h3>
+								<div class="inner">
+									<p><label for="editName">Name</label>
+									<input type="text" name="" ng-model="contact.name" /></p>
+									<p><label for="editEmail">Name</label>
+									<input type="text" name="editEmail" ng-model="contact.email" /></p>
+									<p><label for="editPrimary">Name</label>
+									<input type="text" name="editPrimary" ng-model="contact.primary" /></p>
+									<p><label for="editLoc">Name</label>
+									<input type="text" name="editLoc" ng-model="contact.location" /></p>
+									<a class="button button-yes" ng-click="editMode = false;">Done</a>
+								</div>
+							</form>
+							<div class="close-button" ng-click="editMode = false;"> </div>
+						</div>
+					</div>
+				</li>
+			</ul>
+		</div>
+	</section>
+
+
+	<script src="bower_components/angular/angular.min.js"></script>
+	<script src="bower_components/angular-animate/angular-animate.min.js"></script>
+	<script src="js/app.js"></script>
+	<script src="js/controllers.js"></script>
+	<script src="js/filters.js"></script>
+</body>
+</html>
